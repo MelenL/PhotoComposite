@@ -3,6 +3,7 @@ from PIL import Image, ImageOps
 import io
 import zipfile
 import os
+import time
 
 # --- PAGE SETUP ---
 st.set_page_config(page_title="PhotoComposite 10x15 Optimizer", layout="centered")
@@ -11,16 +12,18 @@ st.set_page_config(page_title="PhotoComposite 10x15 Optimizer", layout="centered
 FINAL_W, FINAL_H = 1800, 1200
 MARGIN = 10
 
-# Configuration for different layouts: (columns, rows)
 GRID_CONFIG = {
-    2: (2, 1),  # 2 columns, 1 row
-    4: (2, 2),  # 2 columns, 2 rows
-    8: (4, 2)  # 4 columns, 2 rows
+    2: (2, 1),
+    4: (2, 2),
+    8: (4, 2)
 }
 
 
 def process_image(uploaded_file, target_w, target_h):
     """Resizes and rotates images to fit a grid cell without cropping."""
+    # Terminal Log
+    print(f" > Processing: {uploaded_file.name}")
+
     img = Image.open(uploaded_file)
     img = ImageOps.exif_transpose(img)
 
@@ -40,13 +43,11 @@ def process_image(uploaded_file, target_w, target_h):
 # --- USER INTERFACE ---
 st.title("PhotoComposite 10x15")
 
-# Sidebar for parameters
 with st.sidebar:
     st.header("Settings")
     division = st.selectbox("Photos per sheet", [2, 4, 8], index=1)
     st.write(f"Layout: {GRID_CONFIG[division][0]} columns x {GRID_CONFIG[division][1]} rows")
 
-# Calculate sub-dimensions based on selection
 cols, rows = GRID_CONFIG[division]
 SUB_W = (FINAL_W - (cols - 1) * MARGIN) // cols
 SUB_H = (FINAL_H - (rows - 1) * MARGIN) // rows
@@ -59,23 +60,33 @@ uploaded_files = st.file_uploader("Choose your photos",
 
 if uploaded_files:
     st.info(f"{len(uploaded_files)} photos selected.")
+    print(f"\n--- New Session: {len(uploaded_files)} files uploaded ---")
 
     if st.button("Generate Print Sheets"):
         zip_buffer = io.BytesIO()
 
+        # Initialize visual feedback
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+
         with zipfile.ZipFile(zip_buffer, "w") as zip_file:
             sheet_count = 0
+            total_files = len(uploaded_files)
 
-            # Process files in batches based on division
-            for i in range(0, len(uploaded_files), division):
+            for i in range(0, total_files, division):
+                # Update status
+                current_batch_num = (i // division) + 1
+                total_batches = (total_files + division - 1) // division
+                status_text.text(f"Generating sheet {current_batch_num} of {total_batches}...")
+
                 sheet = Image.new('RGB', (FINAL_W, FINAL_H), (255, 255, 255))
                 batch = uploaded_files[i:i + division]
 
+                print(f"--- Creating Sheet {current_batch_num} ---")
+
                 for idx, file in enumerate(batch):
-                    # Calculate grid position
                     col_idx = idx % cols
                     row_idx = idx // cols
-
                     pos_x = col_idx * (SUB_W + MARGIN)
                     pos_y = row_idx * (SUB_H + MARGIN)
 
@@ -87,6 +98,12 @@ if uploaded_files:
                 sheet.save(img_io, format='JPEG', quality=95)
                 zip_file.writestr(f"print_sheet_{sheet_count}.jpg", img_io.getvalue())
 
+                # Update progress bar
+                progress = min((i + division) / total_files, 1.0)
+                progress_bar.progress(progress)
+
+        status_text.text("Processing complete!")
+        print(f"--- Task Finished: {sheet_count} sheets created ---\n")
         st.success(f"{sheet_count} print sheets successfully generated!")
 
         st.download_button(
