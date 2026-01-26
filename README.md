@@ -1,7 +1,7 @@
 # PhotoComposite 10x15
 
 **Author:** Melen Laclais  
-**License:** Public Domain (CC0)  
+**License:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)  
 **Live Demo:** [photocomposite.streamlit.app](https://photocomposite.streamlit.app/#photo-composite-10x15)
 
 ## Overview
@@ -30,4 +30,4 @@ The application is hosted on **Streamlit Cloud**. You can access the interface d
 3. Generate and download the processed composites as a consolidated ZIP archive.
 
 ---
-*This work is dedicated to the public domain. It is provided "as is", without warranty of any kind.*
+**Attribution Requirement:** You are free to share and adapt this material for any purpose, even commercially, provided that you give appropriate credit to **Melen Laclais**.
