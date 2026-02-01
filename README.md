@@ -28,6 +28,3 @@ The application is hosted on **Streamlit Cloud**. You can access the interface d
 1. Select the desired density (2, 4, or 8 photos per sheet) using the sidebar.
 2. Upload image files (JPG, PNG, WebP).
 3. Generate and download the processed composites as a consolidated ZIP archive.
-
----
-**Public Domain Dedication:** This work has been marked as dedicated to the public domain. You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.
